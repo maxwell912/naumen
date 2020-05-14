@@ -1,0 +1,19 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                                 controllers.PersonController.index
+GET     /phones                           controllers.PersonController.getAllPersons
+GET     /phones/:id                       controllers.PersonController.getPerson(id: Long)
+GET     /phones/filterByName/:substring   controllers.PersonController.getFilteredByName(substring: String)
+GET     /phones/filterByNumber/:substring controllers.PersonController.getFilteredByMobile(substring: String)
+
+POST    /phones/add                       controllers.PersonController.addPerson
+
+PUT     /phones/update/:id                controllers.PersonController.updatePerson(id: Long)
+
+DELETE  /phones/delete/:id                controllers.PersonController.deletePerson(id: Long)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

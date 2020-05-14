@@ -1,0 +1,180 @@
+@()
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Phone book</title>
+    <style>
+    .user{
+      display: flex;
+      background:#f4f4f4;
+      padding:10px;
+      margin-bottom:10px;
+    }
+
+    .user ul{
+      list-style: none;
+    }
+  </style>
+</head>
+<body>
+
+
+<br><br>
+<h1>PhoneBook</h1>
+
+<form id="form">
+    <input type="text" name="name" placeholder="name">
+    <input type="text" name="phoneNumber" placeholder="phoneNumber">
+    <input type="reset" value="add">
+</form>
+
+<br></br>
+
+<form id="updateForm">
+  <input type="number" name="id" placeholder="id">
+  <input type="text" name="name" placeholder="name">
+  <input type="text" name="phoneNumber" placeholder="phoneNumber">
+  <input type="reset" value="update">
+</form>
+
+<form id="deleteForm">
+  <input type="number" name="id" placeholder="id">
+  <input type="reset" value="delete">
+</form>
+
+<br></br>
+
+<form id="nameFilterForm"><p>Filter by name</p>
+  <input type="text" name="substring" placeholder="filter">
+  <input type="reset" value="filter">
+</form>
+
+<form id="numberFilterForm"><p>Filter by number</p>
+  <input type="text" name="substring" placeholder="filter">
+  <input type="reset" value="filter">
+</form>
+
+<br></br>
+
+<h2>Users</h2>
+<div id="users"></div>
+
+
+<script>
+    function printUsers(users){
+      output = ''
+      for(var i in users){
+        output +=
+          '<div class="user">' +
+          '<ul>' +
+          '<li>ID: '+users[i].id+'</li>' +
+          '<li>Name: '+users[i].name+'</li>' +
+          '<li>Phone number: '+users[i].phoneNumber+'</li>' +
+          '</ul>' +
+          '</div>';
+      }
+      document.getElementById('users').innerHTML = output;
+    }
+
+    function loadUsers(){
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'phones', true);
+
+      xhr.onload = function(){
+        if(this.status == 200){
+          var users = JSON.parse(this.responseText);
+          printUsers(users)
+        }
+      }
+      xhr.send();
+    }
+
+    document.getElementById('form').addEventListener("reset", submitForm);
+
+    function submitForm(event) {
+      var formData = new FormData(event.target);
+
+      var obj = {};
+      formData.forEach((value, key) => obj[key] = value);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'phones/add', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+
+      xhr.onload = loadUsers
+
+      xhr.send(JSON.stringify(obj));
+    }
+
+    document.getElementById('updateForm').addEventListener("reset", updatePerson);
+
+    function updatePerson(event) {
+      var formData = new FormData(event.target);
+
+      var obj = {};
+      formData.forEach((value, key) => obj[key] = value);
+
+      var xhr = new XMLHttpRequest();
+      console.log('phones/update/' + formData.get("id"))
+      xhr.open('PUT', 'phones/update/' + formData.get("id"), true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+
+      xhr.onload = loadUsers
+
+      xhr.send(JSON.stringify(obj));
+    }
+
+    document.getElementById('deleteForm').addEventListener("reset", deletePerson);
+
+    function deletePerson(event) {
+      var formData = new FormData(event.target);
+
+      var xhr = new XMLHttpRequest();
+      console.log('phones/delete/' + formData.get("id"))
+      xhr.open('DELETE', 'phones/delete/' + formData.get("id"), true);
+
+      xhr.onload = loadUsers
+
+      xhr.send();
+    }
+
+    document.getElementById('nameFilterForm').addEventListener("reset", nameFilter);
+
+    function nameFilter(){
+      var formData = new FormData(event.target);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'phones/filterByName/' + formData.get("substring"), true);
+
+      xhr.onload = function(){
+        if(this.status == 200){
+          var users = JSON.parse(this.responseText);
+          printUsers(users)
+        }
+      }
+      xhr.send();
+    }
+
+    document.getElementById('numberFilterForm').addEventListener("reset", numberFilter);
+
+    function numberFilter(){
+      var formData = new FormData(event.target);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'phones/filterByNumber/' + formData.get("substring"), true);
+
+      xhr.onload = function(){
+        if(this.status == 200){
+          var users = JSON.parse(this.responseText);
+          printUsers(users)
+        }
+      }
+      xhr.send();
+    }
+  </script>
+</body>
+</html>
